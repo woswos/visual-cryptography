@@ -1,0 +1,49 @@
+body {
+   color: #4a4a4a;
+   font-size: 13px;
+   font-weight: 400;
+   line-height: 1.5;
+ }
+
+ a {
+   color: #4a4a4a;
+   cursor: pointer;
+   text-decoration: none;
+ }
+
+ .button {
+   font-size: 13px;
+ }
+
+ .section.is-header {
+   padding: 15px;
+ }
+
+ .notification{
+   padding: 9px;
+ }
+
+ ::selection {
+   background-color: #666;
+   color: #fff
+ }
+
+ .navbar-item:hover {
+   text-decoration: underline;
+   text-underline-position: under;
+ }
+
+ #image-box {
+   height: 800px;
+   width: 100%;
+ }
+
+ #image-iframe {
+   height: 100%;
+   width: 100%;
+ }
+
+ #current-page {
+   text-decoration: underline;
+   text-underline-position: under;
+ }

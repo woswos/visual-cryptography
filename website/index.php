@@ -19,74 +19,24 @@ if(!isset($_SESSION["uploadCompleted"])){
   <meta name="viewport" content="width=device-width">
 
   <title>Visual Cryptography</title>
+
+  <!-- Include Bulma CSS Framework -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
-  <link href="website/static/css/jquery.dm-uploader.min.css" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
+  <!-- Include JQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-  <style>
+  <!-- Include Custom CSS File -->
+  <link rel="stylesheet" href="website/static/css/style.css">
 
-    body {
-       color: #4a4a4a;
-       font-size: 13px;
-       font-weight: 400;
-       line-height: 1.5;
-     }
-
-     a {
-       color: #4a4a4a;
-       cursor: pointer;
-       text-decoration: none;
-     }
-
-     .button {
-       font-size: 13px;
-     }
-
-     .section.is-header {
-       padding: 15px;
-     }
-
-     .notification{
-       padding: 9px;
-     }
-
-     ::selection {
-       background-color: #666;
-       color: #fff
-     }
-
-     .navbar-item:hover {
-       text-decoration: underline;
-       text-underline-position: under;
-     }
-
-     #image-box {
-       height: 800px;
-       width: 100%;
-     }
-
-     #image-iframe {
-       height: 100%;
-       width: 100%;
-     }
-
-     #current-page {
-       text-decoration: underline;
-       text-underline-position: under;
-     }
-   </style>
-
-  <script type="text/javascript">
-  function uploadingBar() {
-  document.getElementById("upload-file-button").className = "button is-success is-loading";
-  }
-  </script>
 </head>
 
 <body>
 
-<!-- HEADER -->
+  <!------------>
+  <!-- HEADER -->
+  <!------------>
   <section class="section is-header">
     <div class="container">
       <nav class="navbar">
@@ -116,13 +66,16 @@ if(!isset($_SESSION["uploadCompleted"])){
     </div>
   </section>
 
-
-<!-- MAIN BODY -->
+  <!--------------->
+  <!-- MAIN BODY -->
+  <!--------------->
   <section class="section">
     <div class="container">
       <div class="columns">
 
+        <!------------------>
         <!-- FIRST COLUMN -->
+        <!------------------>
         <div class="column">
 
           <!-- Info text -->
@@ -136,7 +89,7 @@ if(!isset($_SESSION["uploadCompleted"])){
               <div class="content">
                 <div class="file">
                   <label class="file-label">
-                    <input class="file-input" type="file" name="fileToUpload" accept="image/*" data-multiple-caption="{count} files selected" multiple>
+                    <input class="file-input" type="file" name="fileToUpload" accept="image/*" data-multiple-caption="{count} files selected" multiple="multiple">
                     <span class="file-cta">
                       <span class="file-icon">
                         <i class="fas fa-upload"></i>
@@ -152,29 +105,32 @@ if(!isset($_SESSION["uploadCompleted"])){
               <!-- Encryption Options -->
               <div class="content">
                 <div class="buttons">
-                  <span class="button">Transparent Pixels</span>
-                  <span class="button">Vector Based</span>
+                  <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button">Transparent Pixels</span>
+                  <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button">Vector Based</span>
                 </div>
               </div>
 
               <!-- Image Uploading Button -->
               <div class="content">
+                <p>Upload and processing might take a while, please wait and don't refresh the page</p>
                 <button class="button is-fullwidth" type="submit" onclick="uploadingBar()" id="upload-file-button">Upload selected image(s)</button>
               </div>
             </form>
           </div>
 
 
-          <!-- Download Images -->
+          <!-- Download Images Button -->
           <div class="content">
             <form method="get" action="website/static/images/visual-cryptography-shares.zip">
-              <button class="button is-fullwidth" type="submit" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled";} ?>>Download Shares</button>
+              <button class="button is-fullwidth" type="submit" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Download Shares</button>
             </form>
           </div>
 
         </div>
 
+        <!------------------->
         <!-- SECOND COLUMN -->
+        <!------------------->
         <div class="column is-two-thirds">
 
           <!-- Image dragging playground box -->
@@ -195,13 +151,68 @@ if(!isset($_SESSION["uploadCompleted"])){
       </div>
   </section>
 
+  <!------------>
   <!-- FOOTER -->
+  <!------------>
   <section class="section is-footer">
   </section>
 
 
-
+  <!--------------------->
+  <!-- JavaScript Files-->
+  <!--------------------->
+  <!-- Needed for the file input form customization -->
   <script src="website/static/js/custom-file-input.js"></script>
+
+  <!-- Needed for turning submit button into loading button -->
+  <script type="text/javascript">
+    function uploadingBar() {
+      document.getElementById("upload-file-button").className = "button is-fullwidth is-success is-loading";
+    }
+  </script>
+
+  <!-- Needed for toggling buttons when pressed -->
+  <script type="text/javascript">
+    function toggleButton(buttonId) {
+      if (document.getElementById(buttonId).className=="button"){
+          document.getElementById(buttonId).className="button is-info";
+
+          $.ajax({
+              type: "GET",
+              url: 'website/session-update.php',
+              data: {clickedButtonId: buttonId, status: "1"},
+              success: function(data){
+                  //alert(data);
+              }
+          });
+
+      }else if(document.getElementById(buttonId).className=="button is-info"){
+          document.getElementById(buttonId).className="button";
+
+          $.ajax({
+              type: "GET",
+              url: 'website/session-update.php',
+              data: {clickedButtonId: buttonId, status: "0"},
+              success: function(data){
+                  //alert(data);
+              }
+          });
+
+      }
+    }
+  </script>
+
+  <!-- Browser check -->
+  <script type="text/javascript">
+  var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('safari') != -1) {
+      if (ua.indexOf('chrome') > -1) {
+        //alert("1") // Chrome
+      } else {
+        alert("This page is not optimized for safari browser, please use chrome browser") // Safari
+      }
+    }
+  </script>
 
 </body>
 
