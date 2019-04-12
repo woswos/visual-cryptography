@@ -6,10 +6,12 @@ session_start();
 if(!isset($_SESSION["uploadCompleted"])){
   $_SESSION["uploadCompleted"] = false;
   $_SESSION["uploadError"] = false;
+  $_SESSION['contrast-slider'] = "10";
+  $_SESSION['brightness-slider'] = "10";
 }
 
 $_SESSION['transparent-pixels-button'] = false;
-$_SESSION['vector-pixels-button'] = false;
+$_SESSION['vector-based-button'] = false;
 
 ?>
 
@@ -25,6 +27,7 @@ $_SESSION['vector-pixels-button'] = false;
 
   <!-- Include Bulma CSS Framework -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-extensions@6/dist/css/bulma-extensions.min.css">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
   <!-- Include JQuery -->
@@ -105,6 +108,21 @@ $_SESSION['vector-pixels-button'] = false;
                 </div>
               </div>
 
+              <!-- Contrast Asjusting Button -->
+              <div class="content">
+                <p>Increase Contrast by (%)</p>
+                <input id="contrast-slider" name="contrast-slider" class="slider has-output is-fullwidth" min="0" max="100" value="<?php echo $_SESSION["contrast-slider"]; ?>" step="1" type="range">
+                <output for="contrast-slider"><?php echo $_SESSION["contrast-slider"]; ?></output>
+              </div>
+
+              <!-- Brightness Asjusting Button -->
+              <div class="content">
+                <p>Increase Brightness by (%)</p>
+                <input id="brightness-slider" name="brightness-slider" class="slider has-output is-fullwidth" min="0" max="100" value="<?php echo $_SESSION["brightness-slider"]; ?>" step="1" type="range">
+                <output for="brightness-slider"><?php echo $_SESSION["brightness-slider"]; ?></output>
+              </div>
+
+
               <!-- Image Uploading Button -->
               <div class="content">
                 <p>Upload and processing might take a while, please wait and don't refresh the page</p>
@@ -119,7 +137,7 @@ $_SESSION['vector-pixels-button'] = false;
 
             <!-- Encryption Options -->
             <div class="content">
-              <p>Select encryption options and download the full sized image</p>
+              <p>Select encryption options and download the full sized image. Processing the image might take a few minutes based on your selections. Please wait.</p>
               <div class="buttons">
                 <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Transparent Pixels</span>
                 <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Vector Based</span>
@@ -155,7 +173,7 @@ $_SESSION['vector-pixels-button'] = false;
               <button class="delete"></button>
               You can drag images with your mouse to check how they overlay
             </div>
-          -->
+            -->
 
           </div>
         </div>
@@ -176,53 +194,84 @@ $_SESSION['vector-pixels-button'] = false;
   <script src="website/static/js/custom-file-input.js"></script>
 
   <!-- Needed for turning submit button into loading button -->
-  <script type="text/javascript">
-    function uploadingBar(buttonId) {
-      document.getElementById(buttonId).className = "button is-fullwidth is-success is-loading";
-    }
-  </script>
-
   <!-- Needed for toggling buttons when pressed -->
-  <script type="text/javascript">
-    function toggleButton(buttonId) {
-      if (document.getElementById(buttonId).className=="button"){
-          document.getElementById(buttonId).className="button is-info";
-
-          $.ajax({
-              type: "GET",
-              url: 'website/session-update.php',
-              data: {clickedButtonId: buttonId, status: "1"},
-              success: function(data){
-                  //alert(data);
-              }
-          });
-
-      }else if(document.getElementById(buttonId).className=="button is-info"){
-          document.getElementById(buttonId).className="button";
-
-          $.ajax({
-              type: "GET",
-              url: 'website/session-update.php',
-              data: {clickedButtonId: buttonId, status: "0"},
-              success: function(data){
-                  //alert(data);
-              }
-          });
-
-      }
-    }
-  </script>
+  <script src="website/static/js/button-actions.js"></script>
 
   <!-- Browser check -->
-  <script type="text/javascript">
-  var ua = navigator.userAgent.toLowerCase();
-    if (ua.indexOf('safari') != -1) {
-      if (ua.indexOf('chrome') > -1) {
-        //alert("1") // Chrome
-      } else {
-        alert("This page is not optimized for safari browser, please use chrome browser") // Safari
-      }
+  <script src="website/static/js/browser-check.js"></script>
+
+  <script>
+  // Find output DOM associated to the DOM element passed as parameter
+  function findOutputForSlider( element ) {
+     var idVal = element.id;
+     outputs = document.getElementsByTagName( 'output' );
+     for( var i = 0; i < outputs.length; i++ ) {
+       if ( outputs[ i ].htmlFor == idVal )
+         return outputs[ i ];
+     }
+  }
+
+  function getSliderOutputPosition( slider ) {
+    // Update output position
+    var newPlace,
+        minValue;
+
+    var style = window.getComputedStyle( slider, null );
+    // Measure width of range input
+    sliderWidth = parseInt( style.getPropertyValue( 'width' ), 10 );
+
+    // Figure out placement percentage between left and right of input
+    if ( !slider.getAttribute( 'min' ) ) {
+      minValue = 0;
+    } else {
+      minValue = slider.getAttribute( 'min' );
     }
+    var newPoint = ( slider.value - minValue ) / ( slider.getAttribute( 'max' ) - minValue );
+
+    // Prevent bubble from going beyond left or right (unsupported browsers)
+    if ( newPoint < 0 ) {
+      newPlace = 0;
+    } else if ( newPoint > 1 ) {
+      newPlace = sliderWidth;
+    } else {
+      newPlace = sliderWidth * newPoint;
+    }
+
+    return {
+      'position': newPlace + 'px'
+    }
+  }
+
+  document.addEventListener( 'DOMContentLoaded', function () {
+    // Get all document sliders
+    var sliders = document.querySelectorAll( 'input[type="range"].slider' );
+    [].forEach.call( sliders, function ( slider ) {
+      var output = findOutputForSlider( slider );
+      if ( output ) {
+        if ( slider.classList.contains( 'has-output-tooltip' ) ) {
+          // Get new output position
+          var newPosition = getSliderOutputPosition( slider );
+
+          // Set output position
+          output.style[ 'left' ] = newPosition.position;
+        }
+
+        // Add event listener to update output when slider value change
+        slider.addEventListener( 'input', function( event ) {
+          if ( event.target.classList.contains( 'has-output-tooltip' ) ) {
+            // Get new output position
+            var newPosition = getSliderOutputPosition( event.target );
+
+            // Set output position
+            output.style[ 'left' ] = newPosition.position;
+          }
+
+          // Update output with slider value
+          output.value = event.target.value;
+        } );
+      }
+    } );
+  } );
   </script>
 
 </body>

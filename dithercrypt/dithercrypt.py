@@ -2,15 +2,18 @@
 
 import secrets
 import PIL.Image
+import PIL.ImageEnhance
 import numpy as np
 import sys
 
 def randfloat():
     return secrets.randbits(32) / (1<<32)
 
-def load_img(fn):
+def load_img(fn, brightness, contrast):
     # Totally incorrect but kind of good enough
     img = PIL.Image.open(fn).convert('L')
+    img = PIL.ImageEnhance.Brightness(img).enhance(float(brightness))
+    img = PIL.ImageEnhance.Contrast(img).enhance(float(contrast))
     arr = np.array(img)
     arr = arr.astype(float) / 255
     return arr
@@ -223,12 +226,13 @@ def main(cmd, *args):
         if cmd == c:
             break
 
-    in_imgs = [load_img(filename) for filename in args[0:in_arity]]
+    # 2rd arument from last is brightness, last argument is contrast
+    in_imgs = [load_img(filename, sys.argv[-2], sys.argv[-1]) for filename in args[0:in_arity]]
     out_imgs = func(*in_imgs)
 
     for img, name in zip(out_imgs, args[in_arity:]):
-        # last argument from the command line is transparency
-        save_img(img, name, sys.argv[-1])
+        # 3rd argument from last argument from the command line is transparency
+        save_img(img, name, sys.argv[-3])
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

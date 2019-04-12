@@ -1,6 +1,9 @@
 <?php
 // Start the session
 session_start();
+$_SESSION['contrast-slider'] = $_POST['contrast-slider'];
+$_SESSION['brightness-slider'] = $_POST['brightness-slider'];
+
 $_SESSION["uploadCompleted"] = TRUE;
 $target_dir = "static/images/";
 $target_file = $target_dir.time()."_".basename($_FILES["fileToUpload"]["name"]);
