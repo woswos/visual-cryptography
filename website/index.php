@@ -5,6 +5,7 @@ session_start();
 
 if(!isset($_SESSION["uploadCompleted"])){
   $_SESSION["uploadCompleted"] = false;
+  $_SESSION["exportCompleted"] = false;
   $_SESSION["uploadError"] = false;
   $_SESSION['contrast-slider'] = "10";
   $_SESSION['brightness-slider'] = "10";
@@ -12,7 +13,7 @@ if(!isset($_SESSION["uploadCompleted"])){
 
 $_SESSION['transparent-pixels-button'] = false;
 $_SESSION['vector-based-button'] = false;
-
+$_SESSION['circle-based-button'] = false;
 ?>
 
 <!DOCTYPE html>
@@ -28,10 +29,6 @@ $_SESSION['vector-based-button'] = false;
   <!-- Include Bulma CSS Framework -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-extensions@6/dist/css/bulma-extensions.min.css">
-  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-
-  <!-- Include JQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
   <!-- Include Custom CSS File -->
   <link rel="stylesheet" href="website/static/css/style.css">
@@ -91,7 +88,7 @@ $_SESSION['vector-based-button'] = false;
 
           <!-- File upload -->
           <div class="content">
-            <form action="website/upload.php" method="post" enctype="multipart/form-data">
+            <form action="website/upload.php" method="post" enctype="multipart/form-data" id="preview-download-form">
               <div class="content">
                 <div class="file">
                   <label class="file-label">
@@ -133,26 +130,25 @@ $_SESSION['vector-based-button'] = false;
 
 
           <!-- File download -->
-          <form action="website/encrypt-full.php" method="post" enctype="multipart/form-data" target="_blank">
+          <!--<form action="website/encrypt-full.php" method="post" enctype="multipart/form-data" target="_blank" id="file-download-form">-->
 
             <!-- Encryption Options -->
             <div class="content">
-              <p>Select encryption options and download the full sized image. Processing the image might take a few minutes based on your selections. Please wait.</p>
+              <p>Select encryption options and download the full sized image</p>
+              <p>Processing the image might take a few minutes based on your selections, please wait</p>
               <div class="buttons">
                 <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Transparent Pixels</span>
+                <span class="button" onclick='toggleButton("circle-pixels-button")' id="circle-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Circle Pixels</span>
                 <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Vector Based</span>
               </div>
             </div>
 
-
             <!-- Download Images Button -->
             <div class="content">
-              <form method="get" action="website/static/images/visual-cryptography-shares.zip">
-                <button class="button is-fullwidth" type="submit" id="download-file-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> ><i class="fas fa-download"></i>&nbsp;&nbsp;Process & Download</button>
-              </form>
+                <button class="button is-fullwidth" type="submit" id="download-file-button" onclick='uploadingBar("download-file-button"); processFiles("download-file-button");' <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> ><i class="fas fa-download"></i>&nbsp;&nbsp;Process & Download</button>
             </div>
 
-        </form>
+          <!--</form>-->
 
 
         </div>
@@ -190,89 +186,25 @@ $_SESSION['vector-based-button'] = false;
   <!--------------------->
   <!-- JavaScript Files-->
   <!--------------------->
+  <!-- Include JQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!--Fontawesome -->
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
   <!-- Needed for the file input form customization -->
   <script src="website/static/js/custom-file-input.js"></script>
 
   <!-- Needed for turning submit button into loading button -->
   <!-- Needed for toggling buttons when pressed -->
+  <!-- Needed for processing uploaded files when corresponding button is pressed -->
   <script src="website/static/js/button-actions.js"></script>
 
   <!-- Browser check -->
   <script src="website/static/js/browser-check.js"></script>
 
-  <script>
-  // Find output DOM associated to the DOM element passed as parameter
-  function findOutputForSlider( element ) {
-     var idVal = element.id;
-     outputs = document.getElementsByTagName( 'output' );
-     for( var i = 0; i < outputs.length; i++ ) {
-       if ( outputs[ i ].htmlFor == idVal )
-         return outputs[ i ];
-     }
-  }
-
-  function getSliderOutputPosition( slider ) {
-    // Update output position
-    var newPlace,
-        minValue;
-
-    var style = window.getComputedStyle( slider, null );
-    // Measure width of range input
-    sliderWidth = parseInt( style.getPropertyValue( 'width' ), 10 );
-
-    // Figure out placement percentage between left and right of input
-    if ( !slider.getAttribute( 'min' ) ) {
-      minValue = 0;
-    } else {
-      minValue = slider.getAttribute( 'min' );
-    }
-    var newPoint = ( slider.value - minValue ) / ( slider.getAttribute( 'max' ) - minValue );
-
-    // Prevent bubble from going beyond left or right (unsupported browsers)
-    if ( newPoint < 0 ) {
-      newPlace = 0;
-    } else if ( newPoint > 1 ) {
-      newPlace = sliderWidth;
-    } else {
-      newPlace = sliderWidth * newPoint;
-    }
-
-    return {
-      'position': newPlace + 'px'
-    }
-  }
-
-  document.addEventListener( 'DOMContentLoaded', function () {
-    // Get all document sliders
-    var sliders = document.querySelectorAll( 'input[type="range"].slider' );
-    [].forEach.call( sliders, function ( slider ) {
-      var output = findOutputForSlider( slider );
-      if ( output ) {
-        if ( slider.classList.contains( 'has-output-tooltip' ) ) {
-          // Get new output position
-          var newPosition = getSliderOutputPosition( slider );
-
-          // Set output position
-          output.style[ 'left' ] = newPosition.position;
-        }
-
-        // Add event listener to update output when slider value change
-        slider.addEventListener( 'input', function( event ) {
-          if ( event.target.classList.contains( 'has-output-tooltip' ) ) {
-            // Get new output position
-            var newPosition = getSliderOutputPosition( event.target );
-
-            // Set output position
-            output.style[ 'left' ] = newPosition.position;
-          }
-
-          // Update output with slider value
-          output.value = event.target.value;
-        } );
-      }
-    } );
-  } );
-  </script>
+  <!-- Code for updating slider values instantly check -->
+  <script src="website/static/js/slider.js"></script>
 
 </body>
 

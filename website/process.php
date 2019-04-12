@@ -1,9 +1,8 @@
 <?php
+if(session_id() == '' || !isset($_SESSION)) { session_start(); }
+
 //avoid apache to kill the php running
 ignore_user_abort(true);
-
-// Start the session
-session_start();
 
 $transparent = $_SESSION['transparent-pixels-button'];
 $vector = $_SESSION['vector-based-button'];
@@ -44,14 +43,5 @@ if($vector == true){
 // zipping
 $command = 'cd /home/bsimsekc/public_html/visual-cryptography/website/static/images/ && ';
 shell_exec($command.$args);
-
-// Downloader
-header('Content-Type: application/download');
-header('Content-Disposition: attachment; filename="visual-cryptography-shares.zip"');
-header("Content-Length: " . filesize("static/images/visual-cryptography-shares.zip"));
-
-$fp = fopen("static/images/visual-cryptography-shares.zip", "r");
-fpassthru($fp);
-fclose($fp);
 
 ?>
