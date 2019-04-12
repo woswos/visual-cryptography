@@ -8,6 +8,9 @@ if(!isset($_SESSION["uploadCompleted"])){
   $_SESSION["uploadError"] = false;
 }
 
+$_SESSION['transparent-pixels-button'] = false;
+$_SESSION['vector-pixels-button'] = false;
+
 ?>
 
 <!DOCTYPE html>
@@ -80,7 +83,7 @@ if(!isset($_SESSION["uploadCompleted"])){
 
           <!-- Info text -->
           <div class="content">
-            <h3>Please choose the image that you want to encrypt</h3>
+            <h4>Please choose the image that you want to encrypt</h4>
           </div>
 
           <!-- File upload -->
@@ -102,29 +105,37 @@ if(!isset($_SESSION["uploadCompleted"])){
                 </div>
               </div>
 
-              <!-- Encryption Options -->
-              <div class="content">
-                <div class="buttons">
-                  <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button">Transparent Pixels</span>
-                  <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button">Vector Based</span>
-                </div>
-              </div>
-
               <!-- Image Uploading Button -->
               <div class="content">
                 <p>Upload and processing might take a while, please wait and don't refresh the page</p>
-                <button class="button is-fullwidth" type="submit" onclick="uploadingBar()" id="upload-file-button">Upload selected image(s)</button>
+                <button class="button is-fullwidth" type="submit" onclick='uploadingBar("upload-file-button")' id="upload-file-button">Preview</button>
               </div>
             </form>
           </div>
 
 
-          <!-- Download Images Button -->
-          <div class="content">
-            <form method="get" action="website/static/images/visual-cryptography-shares.zip">
-              <button class="button is-fullwidth" type="submit" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Download Shares</button>
-            </form>
-          </div>
+          <!-- File download -->
+          <form action="website/encrypt-full.php" method="post" enctype="multipart/form-data" target="_blank">
+
+            <!-- Encryption Options -->
+            <div class="content">
+              <p>Select encryption options and download the full sized image</p>
+              <div class="buttons">
+                <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Transparent Pixels</span>
+                <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Vector Based</span>
+              </div>
+            </div>
+
+
+            <!-- Download Images Button -->
+            <div class="content">
+              <form method="get" action="website/static/images/visual-cryptography-shares.zip">
+                <button class="button is-fullwidth" type="submit" id="download-file-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> ><i class="fas fa-download"></i>&nbsp;&nbsp;Process & Download</button>
+              </form>
+            </div>
+
+        </form>
+
 
         </div>
 
@@ -137,7 +148,7 @@ if(!isset($_SESSION["uploadCompleted"])){
           <div class="box" id="image-box">
 
             <!-- Image dragging playground itself -->
-            <iframe src="website/drag-images.php" id="image-iframe"></iframe>
+            <iframe src="website/drag-images.php" id="image-iframe" scrolling="no" seamless="seamless"></iframe>
 
             <!--
             <div class="notification">
@@ -166,8 +177,8 @@ if(!isset($_SESSION["uploadCompleted"])){
 
   <!-- Needed for turning submit button into loading button -->
   <script type="text/javascript">
-    function uploadingBar() {
-      document.getElementById("upload-file-button").className = "button is-fullwidth is-success is-loading";
+    function uploadingBar(buttonId) {
+      document.getElementById(buttonId).className = "button is-fullwidth is-success is-loading";
     }
   </script>
 

@@ -3,7 +3,7 @@
 session_start();
 
 if($_SESSION["uploadCompleted"]){
-  $fileName = "output";
+  $fileName = "output_preview_";
 } else {
   $fileName = "default";
 }

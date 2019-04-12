@@ -9,7 +9,7 @@ def randfloat():
     return secrets.randbits(32) / (1<<32)
 
 def load_img(fn):
-    """Totally incorrect but kind of good enough."""
+    # Totally incorrect but kind of good enough
     img = PIL.Image.open(fn).convert('L')
     arr = np.array(img)
     arr = arr.astype(float) / 255
@@ -29,9 +29,12 @@ def transparent(myimage):
 
     img.save(myimage, "PNG")
 
-def save_img(img, fn):
+def save_img(img, fn, transparency):
     PIL.Image.fromarray(img).save(fn)
-    transparent(fn)
+
+    # Make the image transparent if the user selects transparent
+    if transparency == "transparency=true":
+        transparent(fn)
 
 def encrypt2(img):
     shape = img.shape
@@ -214,22 +217,18 @@ commands = [
 ]
 
 def main(cmd, *args):
+
+
     for c, in_arity, out_arity, func in commands:
         if cmd == c:
             break
-    else:
-        print('Usage: %s [%s] ...' % (sys.argv[0], '|'.join([c for c, _, _, _ in commands])))
-        return 1
-
-    if len(args) != in_arity + out_arity:
-        print('Usage: %s %s (%d input images) (%d output images)' % (sys.argv[0], cmd, in_arity, out_arity))
-        return 1
 
     in_imgs = [load_img(filename) for filename in args[0:in_arity]]
     out_imgs = func(*in_imgs)
 
     for img, name in zip(out_imgs, args[in_arity:]):
-        save_img(img, name)
+        # last argument from the command line is transparency
+        save_img(img, name, sys.argv[-1])
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
