@@ -29,3 +29,35 @@ function toggleButton(buttonId) {
 
   }
 }
+
+function processFiles(buttonId) {
+       $.ajax({
+           type: "POST",
+           url: 'website/process.php',
+           timeout: 120000,
+           success: function(data){
+               document.getElementById(buttonId).className = "button is-fullwidth";
+
+               $.ajax({
+                  url: 'website/static/images/visual-cryptography-shares.zip',
+                  method: 'GET',
+                  xhrFields: {
+                      responseType: 'blob'
+                  },
+                  success: function (data) {
+                      var a = document.createElement('a');
+                      var url = window.URL.createObjectURL(data);
+                      a.href = url;
+                      a.download = 'visual-cryptography-shares.zip';
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                  }
+               });
+
+           },
+          fail: function(xhr, textStatus, errorThrown){
+             alert('Request failed, probably file size is too big');
+          }
+       });
+
+}

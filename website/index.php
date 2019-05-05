@@ -9,6 +9,9 @@ if(!isset($_SESSION["uploadCompleted"])){
   $_SESSION["uploadError"] = false;
   $_SESSION['contrast-slider'] = "10";
   $_SESSION['brightness-slider'] = "10";
+  $_SESSION['pixel-size'] = "1";
+  $_SESSION['pixel-sampling-frequency'] = "1";
+  $_SESSION['pixel-type'] = "rectangle";
 }
 
 $_SESSION['transparent-pixels-button'] = false;
@@ -129,27 +132,27 @@ $_SESSION['circle-based-button'] = false;
           </div>
 
 
-          <!-- File download -->
-          <!--<form action="website/encrypt-full.php" method="post" enctype="multipart/form-data" target="_blank" id="file-download-form">-->
 
-            <!-- Encryption Options -->
-            <div class="content">
-              <p>Select encryption options and download the full sized image</p>
-              <p>Processing the image might take a few minutes based on your selections, please wait</p>
-              <div class="buttons">
-                <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Transparent Pixels</span>
-                <span class="button" onclick='toggleButton("circle-pixels-button")' id="circle-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Circle Pixels</span>
-                <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Vector Based</span>
-              </div>
-            </div>
+          <!-- Hide when no file is uploaded by the user -->
+          <div <?php if(!$_SESSION["uploadCompleted"]){echo "style='display:none;'" ;} ?>>
 
-            <!-- Download Images Button -->
-            <div class="content">
-                <button class="button is-fullwidth" type="submit" id="download-file-button" onclick='uploadingBar("download-file-button"); processFiles("download-file-button");' <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> ><i class="fas fa-download"></i>&nbsp;&nbsp;Process & Download</button>
-            </div>
+                <!-- Encryption Options -->
+                <div class="content" >
+                  <p>Select encryption options and download the full sized image</p>
+                  <p>Processing the image might take a few minutes based on your selections, please wait</p>
+                  <div class="buttons">
+                    <span class="button" onclick='toggleButton("transparent-pixels-button")' id="transparent-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Transparent Pixels</span>
+                    <span class="button" onclick='toggleButton("circle-pixels-button")' id="circle-pixels-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Circle Pixels</span>
+                    <span class="button" onclick='toggleButton("vector-based-button")' id="vector-based-button" <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> >Vector Based</span>
+                  </div>
+                </div>
 
-          <!--</form>-->
+                <!-- Download Images Button -->
+                <div class="content">
+                    <button class="button is-fullwidth" type="submit" id="download-file-button" onclick='uploadingBar("download-file-button"); processFiles("download-file-button");' <?php if(!$_SESSION["uploadCompleted"]){echo "disabled" ;} ?> ><i class="fas fa-download"></i>&nbsp;&nbsp;Process & Download</button>
+                </div>
 
+          </div>
 
         </div>
 
