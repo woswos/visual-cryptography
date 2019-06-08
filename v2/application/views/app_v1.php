@@ -12,7 +12,7 @@
             <h4>Please upload the image that you want to encrypt</h4>
           </div>
 
-          <form action="https://<?php echo base_url ('uploader'); ?>" enctype="multipart/form-data" class="dropzone" id="image-upload" method="POST">
+          <form action="<?php echo base_url ('uploader'); ?>" enctype="multipart/form-data" class="dropzone" id="image-upload" method="POST">
           </form>
 
 
@@ -27,7 +27,7 @@
           <div class="box" id="image-box">
 
             <!-- Image dragging playground itself -->
-            <iframe src="https://<?php echo base_url ('drag_images'); ?>" id="image-iframe" scrolling="no" seamless="seamless"></iframe>
+            <iframe src="<?php echo base_url ('drag_images'); ?>" id="image-iframe" scrolling="no" seamless="seamless"></iframe>
 
             <!--
             <div class="notification">

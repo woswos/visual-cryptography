@@ -60,3 +60,6 @@ $route['app_v2'] = 'app_v2';
 
 $route['drag_images'] = 'drag_images';
 $route['uploader']['post'] = 'Uploader';
+
+$route['session'] = 'Session_controller';
+$route['session/reset'] = 'Session_controller/reset';

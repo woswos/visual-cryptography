@@ -6,12 +6,18 @@ class Uploader extends CI_Controller {
 
 	public function index()
 	{
-		//$config['encrypt_name'] = TRUE;
+		$this->load->library('session');
 
 		$new_name = time()."_".$_FILES["file"]['name'];
 
-		$config['file_name'] = $new_name;
 
+		$existing_session[] = $this->session->userdata('last_uploaded_file');
+
+		$existing_session[] = $new_name;
+
+    $this->session->set_userdata('last_uploaded_file', $existing_session);
+
+		$config['file_name'] = $new_name;
 		$config['upload_path']   = './uploads/';
 		$config['allowed_types'] = 'gif|jpg|png';
 		$config['max_size']      = 1024;

@@ -29,17 +29,17 @@
 
         <div class="navbar-brand">
           <span class="navbar-item">
-            <a class="is-link" href="https://<?php echo base_url ('home'); ?>" rel="nofollow" <?php if($title=="Home"){echo "id='current-page'";} ?>>
+            <a class="is-link" href="<?php echo base_url ('home'); ?>" rel="nofollow" <?php if($title=="Home"){echo "id='current-page'";} ?>>
               Home
             </a>
           </span>
           <span class="navbar-item">
-            <a class="is-link" href="https://<?php echo base_url ('app_v1'); ?>" rel="nofollow" <?php if($title=="App v1"){echo "id='current-page'";} ?>>
+            <a class="is-link" href="<?php echo base_url ('app_v1'); ?>" rel="nofollow" <?php if($title=="App v1"){echo "id='current-page'";} ?>>
               Version 1
             </a>
           </span>
           <span class="navbar-item">
-            <a class="is-link" href="https://<?php echo base_url ('app_v2'); ?>" rel="nofollow" <?php if($title=="App v2"){echo "id='current-page'";} ?>>
+            <a class="is-link" href="<?php echo base_url ('app_v2'); ?>" rel="nofollow" <?php if($title=="App v2"){echo "id='current-page'";} ?>>
               Version 2
             </a>
           </span>
