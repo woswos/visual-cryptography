@@ -5,7 +5,7 @@ pyinstaller test.py --onefile --hidden-import=svgwrite
 ```
 ```
 pyinstaller test.py --onefile --hidden-import=svgwrite
-./dist/test '{"algorithm": "2", "brightness":"1", "contrast":"1", "img0":"images/0.jpg", "img1":"images/1.jpg", "img2":"images/2.jpg"}' '{"vector":"true", "type":"custom", "customFileBlack":"images/patternBlack.svg", "transparent":"true", "pixelSize":"1", "samplingFrequency":"2"}'
+./dist/test '{"algorithm": "2", "brightness":"1", "contrast":"1", "img0":"images/0.jpg", "img1":"images/1.jpg", "img2":"images/2.jpg"}' '{"vector":"true", "type":"custom", "customFile":"images/patternBlack.svg", "transparent":"true", "pixelSize":"1", "samplingFrequency":"2"}'
 ```
 
 noise1in2out: Input single image, get 2 meaningless noise patterns. Overlapping these two meaningless noise patterns gives the original image.
