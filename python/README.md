@@ -1,6 +1,6 @@
 For compiling the executable, run: 
 ```
-pyinstaller test.py --onefile --hidden-import=Module && ./dist/test noise1in2out '{"0":"test.png", "1":"test2.png"}'
+pyinstaller test.py --onefile --hidden-import=svgwrite --hidden-import=matplotlib && ./dist/test 0 '{"0":"images/1.jpg", "1":"images/2.jpg", "2":"images/3.jpg"}'
 ```
 
 noise1in2out: Input single image, get 2 meaningless noise patterns. Overlapping these two meaningless noise patterns gives the original image.
