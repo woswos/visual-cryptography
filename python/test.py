@@ -6,9 +6,7 @@ import PIL.Image
 import PIL.ImageEnhance
 import numpy as np
 import json
-
 import svgwrite
-from matplotlib.image import imread
 
 # pyinstaller test.py --onefile && ./dist/test arg1 arg2
 #   arg1 -> algorithm selection
@@ -34,7 +32,7 @@ def loadImage(fileName):
 
 def saveImage(img, fileName):
     PIL.Image.fromarray(img).save(fileName)
-    print("Saved output file: ", fileName)
+
 
 def drawImage(dist):
     total_p = 0.0
@@ -152,35 +150,122 @@ def steganography3in2out(clear1, clear2, secret):
     return (out1, out2)
 
 
+def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSamplingFreq):
+    image = loadImage(inputFile)
+    dwg = svgwrite.Drawing(filename = str(outputFile), profile='tiny')
+
+    pixelSize = int(pixelSize)
+    # You may skip some pixels
+    pixelSamplingFreq = int(pixelSamplingFreq)
+
+    if(shape == "rectangle"):
+        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                pixelColor = image[yPixel][xPixel]
+                if(str(transparency) == "false"):
+                    if(pixelColor < 0.5):
+                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
+                    else:
+                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='white'))
+                else:
+                    if(pixelColor < 0.5):
+                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
+
+    if(shape == "circle"):
+        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                pixelColor = image[yPixel][xPixel]
+                if(str(transparency) == "false"):
+                    if(pixelColor < 0.5):
+                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
+                    else:
+                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='white'))
+                else:
+                    if(pixelColor < 0.5):
+                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
+
+    if(shape == "triangle"):
+        flip = False
+        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                pixelColor = image[yPixel][xPixel]
+                print(pixelColor)
+                if(str(transparency) == "false"):
+                    if(flip):
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
+                            flip = False
+                    else:
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
+                            flip = True
+                else:
+                    if(flip):
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
+                            flip = False
+                    else:
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
+                            flip = True
+
+    dwg.save()
+
+
 if __name__ == '__main__':
     selectedAlgorithm = sys.argv[1]
     inputFiles = sys.argv[2]
+    vector = sys.argv[3]
+
+    # Parse files
+    inputFilesParsed = json.loads(inputFiles)
+    vectorParsed = json.loads(vector)
 
     print("Selected algorithm: ", selectedAlgorithm)
     print("Given input file(s): ", inputFiles)
+    print("Vectorize: ", vectorParsed["vector"])
+    if(vectorParsed["vector"] == "true"):
+        print("Vector Type: ", vectorParsed["type"])
+        print("Vector Transparent: ", vectorParsed["transparent"])
+        print("Vector pixel size: ", vectorParsed["pixelSize"])
+        print("Vector pixel sampling frequency: ", vectorParsed["samplingFrequency"])
 
-    inputFilesParsed = json.loads(inputFiles)
-
+    print("")
+    # Apply encryption algorithms
     if ((selectedAlgorithm == "noise1in2out") or (selectedAlgorithm == "0")):
+        print("Processing...")
         image = loadImage(inputFilesParsed["0"])
         outputImages = noise1in2out(image)
-        saveImage(outputImages[0], "result/1.png")
-        saveImage(outputImages[1], "result/2.png")
 
     elif((selectedAlgorithm == "steganography3in2out") or (selectedAlgorithm == "1")):
+        print("Processing...")
         clear1 = loadImage(inputFilesParsed["0"])
         clear2 = loadImage(inputFilesParsed["1"])
         secret = loadImage(inputFilesParsed["2"])
         outputImages = steganography3in2out(clear1, clear2, secret)
-        saveImage(outputImages[0], "result/1.png")
-        saveImage(outputImages[1], "result/2.png")
 
     elif((selectedAlgorithm == "noise3in3out") or (selectedAlgorithm == "2")):
+        print("Processing...")
         image1 = loadImage(inputFilesParsed["0"])
         image2 = loadImage(inputFilesParsed["1"])
         image3 = loadImage(inputFilesParsed["2"])
         outputImages = noise3in3out(image1, image2, image3)
-        saveImage(outputImages[0], "result/1.png")
-        saveImage(outputImages[1], "result/2.png")
-        saveImage(outputImages[2], "result/3.png")
-# print "default_5.png;default_6.png;"
+
+    print("Output file(s): ")
+    directory = "result/"
+    for i in range(0, len(outputImages)):
+        fileName = directory + str(i) + ".png"
+        saveImage(outputImages[i], fileName)
+        print(fileName)
+
+    # Decide to convert to vector or not
+    if (vectorParsed["vector"] == "true"):
+        print("")
+        print("Converting to vector...")
+        print("Might take a while...")
+        for i in range(0, len(outputImages)):
+            inputFile = directory + str(i) + ".png"
+            outputFile = directory + str(i) + ".svg"
+            convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"])
+
+        print("Converted images to SVG")
