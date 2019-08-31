@@ -7,24 +7,21 @@ import PIL.ImageEnhance
 import numpy as np
 import json
 import svgwrite
-
-# pyinstaller test.py --onefile && ./dist/test arg1 arg2
-#   arg1 -> algorithm selection
-#   arg2 -> input file (absolute path)
-
-#print ("This is the name of the script: ", sys.argv[0])
-#print ("Number of arguments: ", len(sys.argv))
-#print ("The arguments are: " , str(sys.argv))
-
+import svgutils.transform as st
 
 def randfloat():
     return secrets.randbits(32) / (1 << 32)
 
 
-def loadImage(fileName):
+def loadImage(fileName, brightness = 1, contrast = 1):
     image = PIL.Image.open(fileName).convert('L')
-    #image = PIL.ImageEnhance.Brightness(image).enhance(float(brightness))
-    #image = PIL.ImageEnhance.Contrast(image).enhance(float(contrast))
+
+    if(float(brightness) < 1):
+        image = PIL.ImageEnhance.Brightness(image).enhance(float(brightness))
+
+    if(float(contrast) < 1):
+        image = PIL.ImageEnhance.Contrast(image).enhance(float(contrast))
+
     imageArray = np.array(image)
     imageArray = imageArray.astype(float) / 255
     return imageArray
@@ -150,7 +147,7 @@ def steganography3in2out(clear1, clear2, secret):
     return (out1, out2)
 
 
-def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSamplingFreq):
+def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSamplingFreq, customFileBlack = "none", customFileWhite = "none"):
     image = loadImage(inputFile)
     dwg = svgwrite.Drawing(filename = str(outputFile), profile='tiny')
 
@@ -209,19 +206,27 @@ def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSam
                             dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
                             flip = True
 
+    if(shape == "custom"):
+        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                pixelColor = image[yPixel][xPixel]
+                if(pixelColor < 0.5):
+                    dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
+                else:
+                    dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='white'))
+
     dwg.save()
 
 
 if __name__ == '__main__':
-    selectedAlgorithm = sys.argv[1]
-    inputFiles = sys.argv[2]
-    vector = sys.argv[3]
+    inputFiles = sys.argv[1]
+    vector = sys.argv[2]
 
     # Parse files
     inputFilesParsed = json.loads(inputFiles)
     vectorParsed = json.loads(vector)
 
-    print("Selected algorithm: ", selectedAlgorithm)
+    print("Selected algorithm: ", inputFilesParsed["algorithm"])
     print("Given input file(s): ", inputFiles)
     print("Vectorize: ", vectorParsed["vector"])
     if(vectorParsed["vector"] == "true"):
@@ -232,23 +237,23 @@ if __name__ == '__main__':
 
     print("")
     # Apply encryption algorithms
-    if ((selectedAlgorithm == "noise1in2out") or (selectedAlgorithm == "0")):
+    if ((inputFilesParsed["algorithm"] == "noise1in2out") or (inputFilesParsed["algorithm"] == "0")):
         print("Processing...")
-        image = loadImage(inputFilesParsed["0"])
+        image = loadImage(inputFilesParsed["img0"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
         outputImages = noise1in2out(image)
 
-    elif((selectedAlgorithm == "steganography3in2out") or (selectedAlgorithm == "1")):
+    elif((inputFilesParsed["algorithm"] == "steganography3in2out") or (inputFilesParsed["algorithm"] == "1")):
         print("Processing...")
-        clear1 = loadImage(inputFilesParsed["0"])
-        clear2 = loadImage(inputFilesParsed["1"])
-        secret = loadImage(inputFilesParsed["2"])
+        clear1 = loadImage(inputFilesParsed["img0"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
+        clear2 = loadImage(inputFilesParsed["img1"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
+        secret = loadImage(inputFilesParsed["img2"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
         outputImages = steganography3in2out(clear1, clear2, secret)
 
-    elif((selectedAlgorithm == "noise3in3out") or (selectedAlgorithm == "2")):
+    elif((inputFilesParsed["algorithm"] == "noise3in3out") or (inputFilesParsed["algorithm"] == "2")):
         print("Processing...")
-        image1 = loadImage(inputFilesParsed["0"])
-        image2 = loadImage(inputFilesParsed["1"])
-        image3 = loadImage(inputFilesParsed["2"])
+        image1 = loadImage(inputFilesParsed["img0"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
+        image2 = loadImage(inputFilesParsed["img1"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
+        image3 = loadImage(inputFilesParsed["img2"], inputFilesParsed["brightness"], inputFilesParsed["contrast"])
         outputImages = noise3in3out(image1, image2, image3)
 
     print("Output file(s): ")
@@ -266,6 +271,19 @@ if __name__ == '__main__':
         for i in range(0, len(outputImages)):
             inputFile = directory + str(i) + ".png"
             outputFile = directory + str(i) + ".svg"
-            convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"])
+
+            try:
+                vectorParsed["customFileBlack"]
+            except:
+                # Adding a new key value pair
+                vectorParsed.update( {"customFileBlack" : "none"})
+
+            try:
+                vectorParsed["customFileWhite"]
+            except:
+                # Adding a new key value pair
+                vectorParsed.update( {"customFileWhite" : "none"})
+
+            convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"], vectorParsed["customFileBlack"], vectorParsed["customFileWhite"])
 
         print("Converted images to SVG")
