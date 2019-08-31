@@ -148,94 +148,111 @@ def steganography3in2out(clear1, clear2, secret):
 
 
 def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSamplingFreq, customFileBlack = "none", customFileWhite = "none"):
-    image = loadImage(inputFile)
-    dwg = svgwrite.Drawing(filename = str(outputFile), profile='tiny')
 
+    image = loadImage(inputFile)
     pixelSize = int(pixelSize)
     # You may skip some pixels
     pixelSamplingFreq = int(pixelSamplingFreq)
 
-    if(shape == "rectangle"):
-        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
-            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
-                pixelColor = image[yPixel][xPixel]
-                if(str(transparency) == "false"):
-                    if(pixelColor < 0.5):
-                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
-                    else:
-                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='white'))
-                else:
-                    if(pixelColor < 0.5):
-                        dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
-
-    if(shape == "circle"):
-        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
-            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
-                pixelColor = image[yPixel][xPixel]
-                if(str(transparency) == "false"):
-                    if(pixelColor < 0.5):
-                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
-                    else:
-                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='white'))
-                else:
-                    if(pixelColor < 0.5):
-                        dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
-
-    if(shape == "triangle"):
-        flip = False
-        for yPixel in range(0, image.shape[0], pixelSamplingFreq):
-            for xPixel in range(0, image.shape[1], pixelSamplingFreq):
-                pixelColor = image[yPixel][xPixel]
-                print(pixelColor)
-                if(str(transparency) == "false"):
-                    if(flip):
-                        if(pixelColor < 0.5):
-                            dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
-                            flip = False
-                    else:
-                        if(pixelColor < 0.5):
-                            dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
-                            flip = True
-                else:
-                    if(flip):
-                        if(pixelColor < 0.5):
-                            dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
-                            flip = False
-                    else:
-                        if(pixelColor < 0.5):
-                            dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
-                            flip = True
-
     if(shape == "custom"):
+
+        # Create an empty output file first
+        dwg = svgwrite.Drawing(filename = str(outputFile), profile='tiny')
+        dwg.save()
+
+        # Load files
+        template = st.fromfile(str(outputFile))
+        black = st.fromfile(str(customFileBlack))
+        white = st.fromfile(str(customFileWhite))
+
         for yPixel in range(0, image.shape[0], pixelSamplingFreq):
             for xPixel in range(0, image.shape[1], pixelSamplingFreq):
                 pixelColor = image[yPixel][xPixel]
                 if(pixelColor < 0.5):
+                    template.append(second_svg)
                     dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
-                else:
-                    dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='white'))
 
-    dwg.save()
+        template.save(str(outputFile))
+
+    else:
+        dwg = svgwrite.Drawing(filename = str(outputFile), profile='tiny')
+
+        if(shape == "rectangle"):
+            for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+                for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                    pixelColor = image[yPixel][xPixel]
+                    if(str(transparency) == "false"):
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
+                        else:
+                            dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='white'))
+                    else:
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.rect((xPixel, yPixel), (pixelSize, pixelSize), fill='black'))
+
+        if(shape == "circle"):
+            for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+                for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                    pixelColor = image[yPixel][xPixel]
+                    if(str(transparency) == "false"):
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
+                        else:
+                            dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='white'))
+                    else:
+                        if(pixelColor < 0.5):
+                            dwg.add(dwg.circle((xPixel, yPixel), pixelSize, fill='black'))
+
+        if(shape == "triangle"):
+            flip = False
+            for yPixel in range(0, image.shape[0], pixelSamplingFreq):
+                for xPixel in range(0, image.shape[1], pixelSamplingFreq):
+                    pixelColor = image[yPixel][xPixel]
+                    print(pixelColor)
+                    if(str(transparency) == "false"):
+                        if(flip):
+                            if(pixelColor < 0.5):
+                                dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
+                                flip = False
+                        else:
+                            if(pixelColor < 0.5):
+                                dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
+                                flip = True
+                    else:
+                        if(flip):
+                            if(pixelColor < 0.5):
+                                dwg.add(dwg.polygon([(xPixel,yPixel), ((xPixel+pixelSize), (yPixel+pixelSize)), ((xPixel+(pixelSize*2)),yPixel)]))
+                                flip = False
+                        else:
+                            if(pixelColor < 0.5):
+                                dwg.add(dwg.polygon([(xPixel,yPixel+pixelSize), (xPixel+pixelSize,yPixel), ((xPixel+(pixelSize*2)),(yPixel+pixelSize))]))
+                                flip = True
+        dwg.save()
+
 
 
 if __name__ == '__main__':
-    inputFiles = sys.argv[1]
-    vector = sys.argv[2]
+    try:
+        inputFiles = sys.argv[1]
+        inputFilesParsed = json.loads(inputFiles)
+        print("Selected algorithm: ", inputFilesParsed["algorithm"])
+        print("Given input file(s): ", inputFiles)
+    except:
+        print("Please specify options")
 
-    # Parse files
-    inputFilesParsed = json.loads(inputFiles)
-    vectorParsed = json.loads(vector)
+    try:
+        vector = sys.argv[2]
+        vectorParsed = json.loads(vector)
+        print("")
+        print("Vectorize: ", vectorParsed["vector"])
+        if(vectorParsed["vector"] == "true"):
+            print("Vector Type: ", vectorParsed["type"])
+            print("Vector Transparent: ", vectorParsed["transparent"])
+            print("Vector pixel size: ", vectorParsed["pixelSize"])
+            print("Vector pixel sampling frequency: ", vectorParsed["samplingFrequency"])
+    except:
+        print()
 
-    print("Selected algorithm: ", inputFilesParsed["algorithm"])
-    print("Given input file(s): ", inputFiles)
-    print("Vectorize: ", vectorParsed["vector"])
-    if(vectorParsed["vector"] == "true"):
-        print("Vector Type: ", vectorParsed["type"])
-        print("Vector Transparent: ", vectorParsed["transparent"])
-        print("Vector pixel size: ", vectorParsed["pixelSize"])
-        print("Vector pixel sampling frequency: ", vectorParsed["samplingFrequency"])
-
-    print("")
     # Apply encryption algorithms
     if ((inputFilesParsed["algorithm"] == "noise1in2out") or (inputFilesParsed["algorithm"] == "0")):
         print("Processing...")
@@ -263,27 +280,30 @@ if __name__ == '__main__':
         saveImage(outputImages[i], fileName)
         print(fileName)
 
-    # Decide to convert to vector or not
-    if (vectorParsed["vector"] == "true"):
-        print("")
-        print("Converting to vector...")
-        print("Might take a while...")
-        for i in range(0, len(outputImages)):
-            inputFile = directory + str(i) + ".png"
-            outputFile = directory + str(i) + ".svg"
+    try:
+        # Decide to convert to vector or not
+        if (vectorParsed["vector"] == "true"):
+            print("")
+            print("Converting to vector...")
+            print("Might take a while...")
+            for i in range(0, len(outputImages)):
+                inputFile = directory + str(i) + ".png"
+                outputFile = directory + str(i) + ".svg"
 
-            try:
-                vectorParsed["customFileBlack"]
-            except:
-                # Adding a new key value pair
-                vectorParsed.update( {"customFileBlack" : "none"})
+                try:
+                    vectorParsed["customFileBlack"]
+                except:
+                    # Adding a new key value pair
+                    vectorParsed.update( {"customFileBlack" : "none"})
 
-            try:
-                vectorParsed["customFileWhite"]
-            except:
-                # Adding a new key value pair
-                vectorParsed.update( {"customFileWhite" : "none"})
+                try:
+                    vectorParsed["customFileWhite"]
+                except:
+                    # Adding a new key value pair
+                    vectorParsed.update( {"customFileWhite" : "none"})
 
-            convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"], vectorParsed["customFileBlack"], vectorParsed["customFileWhite"])
+                convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"], vectorParsed["customFileBlack"], vectorParsed["customFileWhite"])
 
-        print("Converted images to SVG")
+            print("Converted images to SVG")
+    except:
+        print("Done")
