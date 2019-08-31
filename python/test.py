@@ -7,6 +7,9 @@ import PIL.ImageEnhance
 import numpy as np
 import json
 
+import svgwrite
+from matplotlib.image import imread
+
 # pyinstaller test.py --onefile && ./dist/test arg1 arg2
 #   arg1 -> algorithm selection
 #   arg2 -> input file (absolute path)
