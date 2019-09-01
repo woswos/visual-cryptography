@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 import os
+import json
 
 def main():
     checkLibraries()
+    #compileCode()
 
     while True:
         try:
@@ -22,6 +24,8 @@ def main():
     print('Use " " if the image name has multiple words. For example, "my photo.png"')
     if(selectedAlgorithim == "noise1in2out"):
         img0 = input("Enter name of the image: ")
+        img1 = "none"
+        img2 = "none"
 
     elif(selectedAlgorithim == "noise3in3out"):
         img0 = input("Enter name of the first image: ")
@@ -74,6 +78,8 @@ def main():
             print("")
             break
 
+    customFile = "none"
+
     if(vectorize == "yes"):
         vectorize = "true"
 
@@ -94,6 +100,7 @@ def main():
         if(type == "custom"):
             customFile = input("Enter name of the custom pattern image: \n")
             print("")
+
 
         while True:
             try:
@@ -140,6 +147,34 @@ def main():
 
     else:
         vectorize = "false"
+        type = "rectangle"
+        transparency = "false"
+        pixelSize = 1
+        samplingFrequency = 1
+
+
+    core = {}
+    core['algorithm'] = selectedAlgorithim
+    core['brightness'] = brightness
+    core['contrast'] = contrast
+
+    inputDir = "images/"
+    core['img0'] = inputDir + img0
+    core['img1'] = inputDir + img1
+    core['img2'] = inputDir + img2
+
+    vectorStuff = {}
+    vectorStuff['vector'] = vectorize
+    vectorStuff['type'] = type
+    vectorStuff['customFile'] = inputDir + customFile
+    vectorStuff['transparency'] = transparency
+    vectorStuff['pixelSize'] = pixelSize
+    vectorStuff['samplingFrequency'] = samplingFrequency
+
+    #time to run the code
+    #command = "./dist/implementation '" + str(json.dumps(core)) + "' '" + str(json.dumps(vectorStuff)) + "' "
+    command = "python implementation.py '" + str(json.dumps(core)) + "' '" + str(json.dumps(vectorStuff)) + "' "
+    os.system(command)
 
 
 def checkLibraries():
@@ -164,13 +199,22 @@ def checkLibraries():
     except:
         install("svgutils")
 
-    print("All good!")
-    print("")
+    install("pyinstaller")
+
+    print("All good! \n")
+
+
+def compileCode():
+    print("Compiling code")
+    command = 'pyinstaller implementation.py --onefile --hidden-import=svgwrite --hidden-import=numpy'
+    os.system(command)
+    print("Done compiling code \n")
 
 
 def install(package):
     command = 'pip install ' + package
     os.system(command)
+
     command = 'pip3 install ' + package
     os.system(command)
 
