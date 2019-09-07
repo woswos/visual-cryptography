@@ -257,7 +257,8 @@ def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSam
                     #template.append(black)
                     black = sg.fromfile(str(customFile))
                     blackRoot = black.getroot()
-                    #blackRoot.moveto(int(yPixel+random.randint(-5,5)), int(xPixel+random.randint(-5,5)), scale=float(pixelSize))
+                    #blackRoot.rotate(random.randint(0, 360))
+                    #blackRoot.moveto(int(yPixel+random.randint(-1,1)), int(xPixel+random.randint(-1,1)), scale=float(pixelSize))
                     blackRoot.moveto(yPixel, xPixel, scale=float(pixelSize))
                     template.append([blackRoot])
 
