@@ -3,7 +3,7 @@ import os
 import json
 
 def main():
-    checkLibraries()
+    #checkLibraries()
     #compileCode()
 
     while True:
