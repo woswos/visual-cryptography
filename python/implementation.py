@@ -10,6 +10,7 @@ import svgwrite
 import svgutils.transform as sg
 from svgutils.compose import *
 import random
+import traceback
 
 def main():
     try:
@@ -79,7 +80,10 @@ def main():
                     # Adding a new key value pair
                     vectorParsed.update( {"customFile" : "none"})
 
-                convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"], vectorParsed["customFile"])
+                try:
+                    convertToSVG(inputFile, outputFile, vectorParsed["type"], vectorParsed["transparent"], vectorParsed["pixelSize"], vectorParsed["samplingFrequency"], vectorParsed["customFile"])
+                except Exception:
+                    traceback.print_exc()
 
             print("Converted images to SVG")
     except:
@@ -224,7 +228,6 @@ def steganography3in2out(clear1, clear2, secret):
 
 
 def convertToSVG(inputFile, outputFile, shape, transparency, pixelSize, pixelSamplingFreq, customFile = "none"):
-
     image = loadImage(inputFile)
     # You may skip some pixels
     pixelSamplingFreq = int(pixelSamplingFreq)

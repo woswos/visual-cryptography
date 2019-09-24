@@ -167,7 +167,7 @@ def main():
     vectorStuff['vector'] = vectorize
     vectorStuff['type'] = type
     vectorStuff['customFile'] = inputDir + customFile
-    vectorStuff['transparency'] = transparency
+    vectorStuff['transparent'] = transparency
     vectorStuff['pixelSize'] = pixelSize
     vectorStuff['samplingFrequency'] = samplingFrequency
 
